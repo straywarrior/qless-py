@@ -60,7 +60,7 @@ import os
 import sys
 import qless
 from qless import logger
-from qless.workers.forking import ForkingWorker
+from qless.workers.serial import SerialWorker
 
 # Add each of the paths to the python search path
 sys.path = [os.path.abspath(p) for p in args.path] + sys.path
@@ -90,5 +90,5 @@ for module in getattr(args, 'import'):
 os.chdir(args.workdir)
 
 # And now run the worker
-ForkingWorker(
+SerialWorker(
     args.queue, qless.Client(args.host, hostname=args.name), **kwargs).run()

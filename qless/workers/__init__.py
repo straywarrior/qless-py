@@ -168,7 +168,7 @@ class Worker(object):
         '''Stop processing the provided jid'''
         raise NotImplementedError('Derived classes must override "kill"')
 
-    def signals(self, signals=('QUIT', 'USR1', 'USR2')):
+    def signals(self, signals=()):
         '''Register our signal handler'''
         for sig in signals:
             signal.signal(getattr(signal, 'SIG' + sig), self.handler)
