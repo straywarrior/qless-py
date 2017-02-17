@@ -42,7 +42,7 @@ class Worker(object):
     @classmethod
     def title(cls, message=None):
         '''Set the title of the process'''
-        if message == None:
+        if message is None:
             return getproctitle()
         else:
             setproctitle('qless-py-worker %s' % message)
@@ -56,7 +56,7 @@ class Worker(object):
         jobs = jobs or [()] * count
         for index in range(count):
             # Filter out the items in jobs that are Nones
-            jobs[index] = [j for j in jobs[index] if j != None]
+            jobs[index] = [j for j in jobs[index] if j is not None]
         return jobs
 
     @classmethod
@@ -99,10 +99,10 @@ class Worker(object):
         # Save our kwargs, since a common pattern to instantiate subworkers
         self.kwargs = kwargs
         # Check for any jobs that we should resume. If 'resume' is the actual
-        # value 'True', we should find all the resumable jobs we can. Otherwise,
-        # we should interpret it as a list of jobs already
+        # value 'True', we should find all the resumable jobs we can.
+        # Otherwise, we should interpret it as a list of jobs already
         self.resume = kwargs.get('resume') or []
-        if self.resume == True:
+        if self.resume:
             self.resume = self.resumable()
         # How frequently we should poll for work
         self.interval = kwargs.get('interval', 60)
@@ -171,7 +171,13 @@ class Worker(object):
     def signals(self, signals=('QUIT', 'USR1', 'USR2')):
         '''Register our signal handler'''
         for sig in signals:
-            signal.signal(getattr(signal, 'SIG' + sig), self.handler)
+            signum = getattr(signal, 'SIG' + sig, None)
+            if not signum:
+                message = 'SIG%s is not supported in this platform' % sig
+                print(message, file=sys.stderr)
+                logger.warning(message)
+                continue
+            signal.signal(signum, self.handler)
 
     def stop(self):
         '''Mark this for shutdown'''
